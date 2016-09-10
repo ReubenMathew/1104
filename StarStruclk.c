@@ -1,5 +1,7 @@
 #pragma config(Sensor, in1,    pot,            sensorPotentiometer)
 #pragma config(Sensor, in2,    gyro,           sensorGyro)
+#pragma config(Sensor, dgtl1,  leftEncoder,    sensorQuadEncoder)
+#pragma config(Sensor, dgtl3,  rightEncoder,   sensorQuadEncoder)
 #pragma config(Motor,  port1,           leftTopOut,    tmotorVex393_HBridge, openLoop, reversed)
 #pragma config(Motor,  port2,           rightDrive,    tmotorVex393HighSpeed_MC29, openLoop, driveRight)
 #pragma config(Motor,  port3,           leftDrive,     tmotorVex393HighSpeed_MC29, openLoop, driveLeft)
@@ -18,6 +20,35 @@
 #pragma competitionControl(Competition)
 
 #include "Vex_Competition_Includes.c"
+
+int previousError = 0;
+float errorSum = 0;
+int powApplied = 0;
+	int rightLift;
+	int leftLift;
+
+void setLift(int power){
+
+	motor[leftBotIn]  = leftLift;
+	motor[leftBotOut] = leftLift;
+	motor[leftTopIn] = leftLift;
+	motor[leftTopOut] = leftLift;
+	motor[rightBotIn] = rightLift;
+	motor[rightBotOut] = rightLift;
+	motor[rightTopIn] = rightLift;
+	motor[rightTopOut] = rightLift;
+
+	rightLift = power;
+	leftLift = power;
+}
+
+void liftPID(int target) {
+	int error = target - SensorValue[pot];
+	int derivative = error - previousError;
+	powApplied = (error*2.0 + derivative*0.3);
+	setLift(powApplied);
+	previousError = error;
+}
 
 int rightBack;
 int leftBack;
@@ -66,6 +97,177 @@ void waitForRelease()
 	while(nLCDButtons != 0){}
 	wait1Msec(5);
 }
+
+// DRIVE PID SECTION
+
+#define PID_SENSOR_INDEX_LEFT	leftEncoder
+#define PID_SENSOR_INDEX_RIGHT rightEncoder
+#define PID_SENSOR_SCALE    1
+#define PID_MOTOR_INDEX_LEFT 			leftDrive
+#define PID_MOTOR_INDEX_RIGHT     rightDrive
+#define PID_MOTOR_SCALE     -1
+
+#define PID_DRIVE_MAX       127
+#define PID_DRIVE_MIN     (-127)
+
+#define PID_INTEGRAL_LIMIT  50
+
+float  pid_Kp = 2.0;
+float  pid_Ki = 0.04;
+float  pid_Kd = 0.0;
+
+static int   pidRunning = 1;
+static float pidRequestedValueRight;
+static float pidRequestedValueLeft;
+
+task pidControllerRight()
+{
+    float  pidSensorCurrentValue;
+
+    float  pidError;
+    float  pidLastError;
+    float  pidIntegral;
+    float  pidDerivative;
+    float  pidDrive;
+
+    // If we are using an encoder then clear it
+    if( SensorType[ PID_SENSOR_INDEX_RIGHT ] == sensorQuadEncoder )
+        SensorValue[ PID_SENSOR_INDEX_RIGHT ] = 0;
+
+    // Init the variables - thanks Glenn :)
+    pidLastError  = 0;
+    pidIntegral   = 0;
+
+    while( true )
+        {
+        // Is PID control active ?
+        if( pidRunning )
+            {
+            // Read the sensor value and scale
+            pidSensorCurrentValue = SensorValue[ PID_SENSOR_INDEX_RIGHT ] * PID_SENSOR_SCALE;
+
+            // calculate error
+            pidError = pidSensorCurrentValue - pidRequestedValueRight;
+
+            // integral - if Ki is not 0
+            if( pid_Ki != 0 )
+                {
+                // If we are inside controlable window then integrate the error
+                if( abs(pidError) < PID_INTEGRAL_LIMIT )
+                    pidIntegral = pidIntegral + pidError;
+                else
+                    pidIntegral = 0;
+                }
+            else
+                pidIntegral = 0;
+
+            // calculate the derivative
+            pidDerivative = pidError - pidLastError;
+            pidLastError  = pidError;
+
+            // calculate drive
+            pidDrive = (pid_Kp * pidError) + (pid_Ki * pidIntegral) + (pid_Kd * pidDerivative);
+
+            // limit drive
+            if( pidDrive > PID_DRIVE_MAX )
+                pidDrive = PID_DRIVE_MAX;
+            if( pidDrive < PID_DRIVE_MIN )
+                pidDrive = PID_DRIVE_MIN;
+
+            // send to motor
+            motor[ PID_MOTOR_INDEX_RIGHT ] = pidDrive * PID_MOTOR_SCALE;
+            }
+        else
+            {
+            // clear all
+            pidError      = 0;
+            pidLastError  = 0;
+            pidIntegral   = 0;
+            pidDerivative = 0;
+            motor[ PID_MOTOR_INDEX_RIGHT ] = 0;
+            }
+
+        // Run at 50Hz
+        wait1Msec( 25 );
+        }
+}
+
+task pidControllerLeft()
+{
+    float  pidSensorCurrentValue;
+
+    float  pidError;
+    float  pidLastError;
+    float  pidIntegral;
+    float  pidDerivative;
+    float  pidDrive;
+
+    // If we are using an encoder then clear it
+    if( SensorType[ PID_SENSOR_INDEX_LEFT ] == sensorQuadEncoder )
+        SensorValue[ PID_SENSOR_INDEX_LEFT ] = 0;
+
+    // Init the variables - thanks Glenn :)
+    pidLastError  = 0;
+    pidIntegral   = 0;
+
+    while( true )
+        {
+        // Is PID control active ?
+        if( pidRunning )
+            {
+            // Read the sensor value and scale
+            pidSensorCurrentValue = SensorValue[ PID_SENSOR_INDEX_LEFT ] * PID_SENSOR_SCALE;
+
+            // calculate error
+            pidError = pidSensorCurrentValue - pidRequestedValueLeft;
+
+            // integral - if Ki is not 0
+            if( pid_Ki != 0 )
+                {
+                // If we are inside controlable window then integrate the error
+                if( abs(pidError) < PID_INTEGRAL_LIMIT )
+                    pidIntegral = pidIntegral + pidError;
+                else
+                    pidIntegral = 0;
+                }
+            else
+                pidIntegral = 0;
+
+            // calculate the derivative
+            pidDerivative = pidError - pidLastError;
+            pidLastError  = pidError;
+
+            // calculate drive
+            pidDrive = (pid_Kp * pidError) + (pid_Ki * pidIntegral) + (pid_Kd * pidDerivative);
+
+            // limit drive
+            if( pidDrive > PID_DRIVE_MAX )
+                pidDrive = PID_DRIVE_MAX;
+            if( pidDrive < PID_DRIVE_MIN )
+                pidDrive = PID_DRIVE_MIN;
+
+            // send to motor
+            motor[ PID_MOTOR_INDEX_LEFT ] = pidDrive * PID_MOTOR_SCALE;
+            }
+        else
+            {
+            // clear all
+            pidError      = 0;
+            pidLastError  = 0;
+            pidIntegral   = 0;
+            pidDerivative = 0;
+            motor[ PID_MOTOR_INDEX_LEFT ] = 0;
+            }
+
+        // Run at 50Hz
+        wait1Msec( 25 );
+        }
+}
+
+
+
+
+
 
 /*void straight()
 {
@@ -254,57 +456,22 @@ startTask(turnThread);
 
 
 
-
-
 void pre_auton()
 {
-  // Set bStopTasksBetweenModes to false if you want to keep user created tasks
-  // running between Autonomous and Driver controlled modes. You will need to
-  // manage all user created tasks if set to false.
+
   bStopTasksBetweenModes = true;
-
-	// Set bDisplayCompetitionStatusOnLcd to false if you don't want the LCD
-	// used by the competition include file, for example, you might want
-	// to display your team name on the LCD in this function.
-	// bDisplayCompetitionStatusOnLcd = false;
-
-  // All activities that occur before the competition starts
-  // Example: clearing encoders, setting servo positions, ...
 }
-
-/*---------------------------------------------------------------------------*/
-/*                                                                           */
-/*                              Autonomous Task                              */
-/*                                                                           */
-/*  This task is used to control your robot during the autonomous phase of   */
-/*  a VEX Competition.                                                       */
-/*                                                                           */
-/*  You must modify the code to add your own robot specific commands here.   */
-/*---------------------------------------------------------------------------*/
 
 task autonomous()
 {
-  // ..........................................................................
-  // Insert user code here.
-  // ..........................................................................
 
-  // Remove this function call once you have "real" code.
   AutonomousCodePlaceholderForTesting();
 }
 
-/*---------------------------------------------------------------------------*/
-/*                                                                           */
-/*                              User Control Task                            */
-/*                                                                           */
-/*  This task is used to control your robot during the user control phase of */
-/*  a VEX Competition.                                                       */
-/*                                                                           */
-/*  You must modify the code to add your own robot specific commands here.   */
-/*---------------------------------------------------------------------------*/
 
 task usercontrol()
 {
-  // User control code here, inside the loop
+
 
   while (true)
   {
@@ -315,10 +482,30 @@ task usercontrol()
 		//while(backDriveBool == 1){
 		//	straightBool = true;
 		//}
-		 motor[driveRight] = rightBack;
+
+
+		/*SECTION FOR LIFT PID LOOP HERE
+
+
+
+
+
+
+
+
+		*/
+	 startTask( pidControllerRight );
+	 startTask( pidControllerLeft );
+
+		 pidRequestedValueRight = pidRequestedValueRight + (vexRT[ Ch2 ]/4);
+		 pidRequestedValueLeft = pidRequestedValueLeft + (vexRT[ Ch3 ]/4);
+
+        wait1Msec(50);
+
+	 motor[driveRight] = rightBack;
 		 motor[driveLeft] = leftBack;
 
-		rightBack = trueSpeed(vexRT[Ch2]);
-		leftBack = trueSpeed(vexRT[Ch3]);
+	rightBack = trueSpeed(pidRequestedValueRight);
+		leftBack = trueSpeed(pidRequestedValueLeft);
   }
 }
