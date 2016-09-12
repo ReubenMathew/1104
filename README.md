@@ -12,7 +12,7 @@ Rules for this repo
 6. Keep the organization of the repository in the utmost importance as we all use this and you really don't want to be that guy that put our competition source code in the wrong folder(imma kill u if u do that)
 7. Don't be me (Reuben) and name your files that you upload here weird shit like ex. (COMPETEITIONCODEREALLLLLLLGGGGGGGGGANGGANGHALAL.c)
 8. Do not create any other branches outside the master branch unless discussed with the admin of the repository (thats me BETCHES!)
-9. You this repo for the betterment of the team and our organization
+9. Use this repo for the betterment of the team and our organization
  
 " How do I create a file in eclipse?"
 -Darshil Patel 2015 RIP
