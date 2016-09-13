@@ -14,4 +14,5 @@ Rules for this repo
 8. Do not create any other branches outside the master branch unless discussed with the admin of the repository 
 9. Use this repo for the betterment of the team and our organization
  
-
+"Whats a code" 
+-Darshil Patel 2015 RIP
