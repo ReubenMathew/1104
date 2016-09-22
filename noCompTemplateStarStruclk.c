@@ -97,7 +97,7 @@ long driveKl = 100;  // Drive integral limit.
 float driveKp = 0.15;
 float driveKi = 0.0;
 float driveKd = 2;
-float turnRatio = 7;  // 12 Ratio of turnKp to use for driving straight.
+float turnRatio = 7;  // 12 Ratio of turnKp to use for driving straight in a straight line.
 
 word maxTurnPower = 127;
 long turnTarget = 0;
