@@ -1,6 +1,8 @@
 const int WHEEL_CIRCUMFERENCE = 10.21;
 
 int numOfRevolutions;
+
+
 void distanceAuto(int distance, int power){
 
 distance = 10.21 * numOfRevolutions;
