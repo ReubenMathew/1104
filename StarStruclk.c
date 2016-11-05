@@ -20,12 +20,11 @@
 #pragma competitionControl(Competition)
 
 #include "Vex_Competition_Includes.c"
-const int WHEEL_CIRCUMFERENCE = 10.21;
 
-int numOfRevolutions;
 void distanceAuto(int distance, int power){
-
-distance = 10.21 * numOfRevolutions;
+const float WHEEL_CIRCUMFERENCE = 10.21;
+int numOfRevolutions;
+distance = WHEEL_CIRCUMFERENCE * numOfRevolutions;
 numOfRevolutions = distance/WHEEL_CIRCUMFERENCE;
 int ticks = numOfRevolutions*90;
 
@@ -59,7 +58,10 @@ void setLift(int power){
 	leftLift = power;
 }
 
-void liftPID(int target) {
+
+
+void liftPID(int degreePOT) {
+	int target = (degreePOT/0.61) + 2247.5;
 	int error = target - SensorValue[pot];
 	int derivative = error - previousError;
 	powApplied = (error*2.0 + derivative*0.3);
@@ -483,8 +485,7 @@ task autonomous()
 {
 
   distanceAuto(240, 90);
-
-
+	liftPID(2400);
 }
 
 
@@ -496,15 +497,6 @@ task usercontrol()
   {
 
 		backDrive();
-
-
-
-
-
-
-
-
-
 
 	 startTask( pidControllerRight );
 	 startTask( pidControllerLeft );
