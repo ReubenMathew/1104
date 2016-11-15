@@ -4,7 +4,7 @@
 //FINAL VALUES USING ZIEGLER NICHOLS METHOD
 const float Kp = 2;
 const float Ki = 0.01;
-const float Kd = 0.8;
+const float Kd = 0.79;
 
 //this can also be changed
 float INTEGRAL_POWER_LIMIT = 50/Ki;
