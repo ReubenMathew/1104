@@ -248,7 +248,7 @@ void pre_auton(){
 
 task autonomous(){
 	startTask(liftcontrol); startTask(clawcontrol); startTask(DriveControl);
-	Auto();
+
 	DisplayAuto();
 }
 
@@ -362,7 +362,7 @@ task usercontrol(){
 		}
 		if(vexRT(Btn8L) == 1){
 			startTask(DriveControl);
-			Auto();
+
 			stopTask(DriveControl);
 		}
 	}
