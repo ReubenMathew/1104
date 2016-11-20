@@ -154,7 +154,11 @@ void SetDriveControl(int Mode, int Value, int Time){
 }
 /*
 int angleToPot(int angle){
+<<<<<<< Updated upstream
 int potVolts = (angle/0.61) + 2247.5;	
+=======
+int potVolts = (angle/0.61) + 2247.5;
+>>>>>>> Stashed changes
 return potVolts;
 }
 */
@@ -255,7 +259,11 @@ task usercontrol()
     bool Claw_Toggle = false; ClawPos = -1;
     int LeftDrive, RightDrive;
     while (true){
+<<<<<<< Updated upstream
      
+=======
+
+>>>>>>> Stashed changes
         if(vexRT(Btn8R) == true){
             LeftDrive = 90;
             RightDrive = -90;
@@ -349,7 +357,11 @@ task usercontrol()
             SetLiftPosition(Lift_Pos3);
             break;
         }
+<<<<<<< Updated upstream
        
+=======
+
+>>>>>>> Stashed changes
     }
 }
 
@@ -406,7 +418,11 @@ task DriveControl(){
 
             //if(DriveMode == Line){
             BrakingTime = 80;
+<<<<<<< Updated upstream
        
+=======
+
+>>>>>>> Stashed changes
             P = (DesiredDriveValue - CurrentDriveValue);
             IVal = IVal + P;
             I = IVal * DkI;
