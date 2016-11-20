@@ -157,7 +157,7 @@ void Dump(int LiftPos){
     DriveActive = false;
     SetDrive(-120, -120);
     Lift_ControlActive = false;
-    Lift_Power = 127;
+    Lift_Power = 120;
     clearTimer(T2);
     while(Break == false && time1[T2] < 1000){
         if(SensorValue(Lift_Pot) < Lift_PosRelease){
@@ -290,7 +290,7 @@ task usercontrol(){
     startTask(liftcontrol); startTask(clawcontrol);
     bool Lift_Toggle1 = false; bool Lift_Toggle2 = false;
     bool Claw_Toggle = false; ClawPos = -1;
-    int LeftDrive; int RightDrive;
+    int LeftDrive, RightDrive;
     while (true){
         DisplayAuto();
         if(vexRT(Btn8R) == true){
@@ -313,7 +313,7 @@ task usercontrol(){
         else if (vexRT(Btn7D) == 1){
             Lift_ControlActive = false;
             Lift_PositionCount = 1;
-            Lift_Power = -100;
+            Lift_Power = -80;
         }
         else{
             Lift_Power = 15;
