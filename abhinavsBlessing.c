@@ -426,7 +426,7 @@ void RotateAngle(int DesiredAngle,int MaxTime,int PowerLimit) {
 		if (abs(RotationError) < SuccessThreshold) {
 			NotDone=0;
 			LeftPwr= -BrakePwr; RightPwr= BrakePwr;
-			motor[driveRight]=RightPwr;motor[driveLeft]=LeftPwr;
+			motor[rightBack]=RightPwr;motor[leftBack]=LeftPwr;motor[rightFront]=RightPwr;motor[leftFront]=LeftPwr;
 					wait1Msec(BrakeTime);
 			//testcode
 			tank(0,0);
@@ -441,7 +441,7 @@ void RotateAngle(int DesiredAngle,int MaxTime,int PowerLimit) {
 			if (RotationPwr < -PowerLimit) RotationPwr=-PowerLimit;
 			else if (RotationPwr > PowerLimit) RotationPwr= PowerLimit;
 			LeftPwr= -RotationPwr; RightPwr= RotationPwr;
-				motor[driveRight]=RightPwr;motor[driveLeft]=LeftPwr;
+			motor[rightBack]=RightPwr;motor[leftBack]=LeftPwr;motor[rightFront]=RightPwr;motor[leftFront]=LeftPwr;
 		}
 		wait1Msec(10);// find best val for this. was 2
 	}
