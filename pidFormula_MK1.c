@@ -28,8 +28,8 @@ if(abs(error) < INTEGRAL_ACTIVE && error != 0){
 preIntegral = preIntegral+error;
 }else {
 preIntegral = 0;
-wadw}
-wda
+}
+
 if(preIntegral > INTEGRAL_POWER_LIMIT){
 preIntegral = INTEGRAL_POWER_LIMIT;
 }
