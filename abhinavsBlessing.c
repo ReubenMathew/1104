@@ -404,7 +404,49 @@ void Auto(){
 
 }
 
+void RotateAngle(int DesiredAngle,int MaxTime,int PowerLimit) {
 
+	//send a neg. angle to turn right.right rotations go negative, power to rotate right is L+,R-
+	int NotDone;int LeftPwr;int RightPwr;int PreviousError;int RotationError;int RotationPwr;
+	const float RotationkD=2.0; const float RotationkP=0.3;	const int SuccessThreshold=15; // this is 1.5 degrees
+	float Dvalue=0.0;int BrakePwr;
+	const float DvalueLimit=30.0;
+	int BrakeVal=40;// 16 was good, went to 40 so upped pwer to 24 then 40
+	int BrakeTime=60;//in msecs 120 was great but need speed
+
+	PreviousError=0; DesiredAngle*=10;
+	if (DesiredAngle > 0) BrakePwr= -BrakeVal;
+	else BrakePwr= BrakeVal;
+	SensorValue[gyro]= 0;
+	// set to Neg of desired angle, then seek zero
+	// when TheError is pos, brake fails
+	clearTimer(T1);NotDone=1;
+	while(((time100[T1]) < MaxTime) && NotDone) {
+		RotationError=DesiredAngle - (-SensorValue[gyro]);// TheError is error value
+		if (abs(RotationError) < SuccessThreshold) {
+			NotDone=0;
+			LeftPwr= -BrakePwr; RightPwr= BrakePwr;
+			motor[driveRight]=RightPwr;motor[driveLeft]=LeftPwr;
+					wait1Msec(BrakeTime);
+			//testcode
+			tank(0,0);
+		}
+		else {
+			Dvalue=(RotationError-PreviousError)*RotationkD;	PreviousError=RotationError;
+			//Limit Dval
+			if (Dvalue > DvalueLimit) Dvalue=DvalueLimit;
+			else if (Dvalue < -DvalueLimit) Dvalue=-DvalueLimit;
+			RotationPwr=(int)((RotationError*RotationkP)+Dvalue);
+			// Limiter-code
+			if (RotationPwr < -PowerLimit) RotationPwr=-PowerLimit;
+			else if (RotationPwr > PowerLimit) RotationPwr= PowerLimit;
+			LeftPwr= -RotationPwr; RightPwr= RotationPwr;
+				motor[driveRight]=RightPwr;motor[driveLeft]=LeftPwr;
+		}
+		wait1Msec(10);// find best val for this. was 2
+	}
+	tank(0,0);
+}
 
 string sLStandard = "Standard Left";
 
