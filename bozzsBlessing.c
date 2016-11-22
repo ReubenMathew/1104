@@ -74,6 +74,115 @@ volatile int Claw_Power;
 volatile int ClawPos = -1;
 
 
+
+word maxDrivePower = 127;
+long driveTarget = 0;
+long driveKl = 100;  // Drive integral limit.
+float driveKp = 0.15;
+float driveKi = 0.0;
+float driveKd = 0;
+float turnRatio = 1;  // 12 Ratio of turnKp to use for driving straight.
+
+word maxTurnPower = 127;
+long turnTarget = 0;
+long turnKl = 100;  // Turn integral limit.
+float turnKp = 0.2;
+float turnKi = 0.0;
+float turnKd = 2;
+float driveRatio = 0;  // Ratio of driveKp to use for turning on a dime.
+
+
+
+task driveThread() {
+	long encoderL, encoderR, t = time1[T1], dt, error, turnError, lastError = 0, p, i = 0, power, turnPower;
+	float d;
+
+	while (true) {
+		encoderR = SensorValue[rightEncoder];
+		encoderL = SensorValue[leftEncoder];
+		dt = (time1[T1] - t);
+
+		error = (driveTarget - (encoderR + encoderL));
+		turnError = (turnTarget - (encoderR - encoderL));
+
+		p = error;
+		i = ((error < driveKl) ? (i + (error * dt)) : 0);
+		d = ((error - lastError) / ((dt > 0) ? dt : 1));
+
+		power = ((driveKp * p) + (driveKi * i) + (driveKd * d));
+		turnPower = ((turnKp * turnRatio) * turnError);
+
+		if (fabs(power) > maxDrivePower) {
+			power = (sgn(power) * maxDrivePower);
+		}
+
+		motor[rightDriveFront] = motor[rightDriveFront] = (power + turnPower);
+		motor[leftDriveFront]  = motor[leftDriveBack] = (power - turnPower);
+
+
+		lastError = error;
+		t += dt;
+
+		sleep(10);
+	}
+}
+
+task turnThread() {
+	long encoderR, encoderL, t = time1[T1], dt, error, driveError, lastError = 0, p, i = 0, power, drivePower;
+	float d;
+
+	while (true) {
+		encoderR = SensorValue[rightEncoder];
+		encoderL = SensorValue[leftEncoder];
+		dt = (time1[T1] - t);
+
+		error = (turnTarget - (encoderR - encoderL));
+		driveError = (driveTarget - (encoderR + encoderL));
+
+		p = error;
+		i = ((error < turnKl) ? (i + (error * dt)) : 0);
+		d = ((error - lastError) / ((dt > 0) ? dt : 1));
+
+		power = ((turnKp * p) + (turnKi * i) + (turnKd * d));
+		drivePower = ((driveKp * driveRatio) * driveError);
+
+		if (fabs(power) > maxTurnPower) {
+			power = (sgn(power) * maxTurnPower);
+		}
+
+		motor[rightDriveFront] = motor[rightDriveBack]  = (drivePower + power);
+		motor[leftDriveFront] = motor[leftDriveFront]  = (drivePower - power);
+
+		lastError = error;
+		t += dt;
+
+		sleep(10);
+	}
+}
+
+
+void drive(long distance, word power = maxDrivePower) {
+	stopTask(turnThread);
+	stopTask(driveThread);
+
+	maxDrivePower = power;
+	driveTarget += (distance*2);
+
+	startTask(driveThread);
+}
+
+void driveInch(long distance, word power = maxDrivePower) {
+	stopTask(turnThread);
+	stopTask(driveThread);
+
+	int DistInch= ((distance*2)/(3.25*PI))*(360);
+	maxDrivePower = power;
+	driveTarget += (DistInch);
+
+	startTask(driveThread);
+
+}
+
 const unsigned int TrueSpeed[128] =
 
 {
@@ -108,13 +217,13 @@ const unsigned int TrueSpeed[128] =
 
 void SetDrive(int LeftDrivePower, int RightDrivePower){
 
-LeftDrivePower = LeftDrivePower > 127 ? 127 : LeftDrivePower;
+	LeftDrivePower = LeftDrivePower > 127 ? 127 : LeftDrivePower;
 
-LeftDrivePower = LeftDrivePower < -127 ? -127 : LeftDrivePower;
+	LeftDrivePower = LeftDrivePower < -127 ? -127 : LeftDrivePower;
 
-RightDrivePower = RightDrivePower > 127 ? 127 : RightDrivePower;
+	RightDrivePower = RightDrivePower > 127 ? 127 : RightDrivePower;
 
-RightDrivePower = RightDrivePower < -127 ? -127 : RightDrivePower;
+	RightDrivePower = RightDrivePower < -127 ? -127 : RightDrivePower;
 
 	if(vexRT(Btn7L) == true){
 
@@ -181,7 +290,61 @@ RightDrivePower = RightDrivePower < -127 ? -127 : RightDrivePower;
 }
 
 
+void RotateAngle(int DesiredAngle,int MaxTime,int PowerLimit) {
 
+	//send a neg. angle to turn right.right rotations go negative, power to rotate right is L+,R-
+	int NotDone;int LeftPwr;int RightPwr;int PreviousError;int RotationError;int RotationPwr;
+	const float RotationkD=2.0; const float RotationkP=0.29; 	const int SuccessThreshold=15; // this is 1.5 degrees //0.29 for 100 speed, 0.25 for 127 speed
+	float Dvalue=0.0;int BrakePwr;
+	const float DvalueLimit=30.0;
+	int BrakeVal=40;// 16 was good, went to 40 so upped pwer to 24 then 40
+	int BrakeTime=60;//in msecs 120 was great but need speed
+
+	PreviousError=0; DesiredAngle*=10;
+	if (DesiredAngle > 0) BrakePwr= -BrakeVal;
+	else BrakePwr= BrakeVal;
+	SensorValue[gyro]= 0;
+	// set to Neg of desired angle, then seek zero
+	// when TheError is pos, brake fails
+	clearTimer(T1);NotDone=1;
+	while(((time100[T1]) < MaxTime) && NotDone) {
+		RotationError=DesiredAngle - (SensorValue[gyro]);// TheError is error value
+		if (abs(RotationError) < SuccessThreshold) {
+			NotDone=0;
+			LeftPwr= -BrakePwr; RightPwr= BrakePwr;
+			motor[rightDriveFront] = RightPwr;
+
+			motor[rightDriveBack] = RightPwr;
+
+			motor[leftDriveFront] = LeftPwr;
+
+			motor[leftDriveBack] = LeftPwr;
+			wait1Msec(BrakeTime);
+			//testcode
+			SetDrive(0,0);
+		}
+		else {
+			Dvalue=(RotationError-PreviousError)*RotationkD;	PreviousError=RotationError;
+			//Limit Dval
+			if (Dvalue > DvalueLimit) Dvalue=DvalueLimit;
+			else if (Dvalue < -DvalueLimit) Dvalue=-DvalueLimit;
+			RotationPwr=(int)((RotationError*RotationkP)+Dvalue);
+			// Limiter-code
+			if (RotationPwr < -PowerLimit) RotationPwr=-PowerLimit;
+			else if (RotationPwr > PowerLimit) RotationPwr= PowerLimit;
+			LeftPwr= -RotationPwr; RightPwr= RotationPwr;
+			motor[rightDriveFront] = RightPwr;
+
+			motor[rightDriveBack] = RightPwr;
+
+			motor[leftDriveFront] = LeftPwr;
+
+			motor[leftDriveBack] = LeftPwr;
+		}
+		wait1Msec(10);// find best val for this. was 2
+	}
+	SetDrive(0,0);
+}
 
 
 task DriveControl();
@@ -198,7 +361,7 @@ volatile bool UnderLoad;
 
 volatile bool DriveActive;
 
-volatile float LinekP = .1;
+volatile float LinekP = .25;
 
 #define Line 1
 
@@ -232,9 +395,9 @@ void SetDriveControl(int Mode, int Value, int Time){
 
 	SensorValue(Gyro) = 0;
 
-TurnConst = (sgn(Value) == -1) ? NoLoadRightTurnConst : NoLoadLeftTurnConst;
+	TurnConst = (sgn(Value) == -1) ? NoLoadRightTurnConst : NoLoadLeftTurnConst;
 
-DesiredDriveValue = (Mode == Line) ? (Value*1800)/10.205 : (Value * TurnConst);
+	DesiredDriveValue = (Mode == Line) ? (Value*360)/10.205 : (Value * TurnConst);
 
 	clearTimer(T1);
 
@@ -266,7 +429,7 @@ void SetLiftMotors(int Power){
 
 	motor[leftOutside] = Power;
 
-		motor[leftInside] = Power;
+	motor[leftInside] = Power;
 }
 
 
@@ -470,6 +633,8 @@ void pre_auton(){
 
 	SensorValue(rightEncoder) = 0;
 
+	SensorValue[gyro] = 0;
+
 	DisplayAuto();
 
 }
@@ -497,10 +662,8 @@ void pre_auton(){
 task autonomous(){
 
 	startTask(liftcontrol); startTask(clawcontrol); startTask(DriveControl);
+	driveInch(12,80);
 
-	Auto();
-
-	DisplayAuto();
 
 }
 
@@ -546,9 +709,9 @@ task usercontrol(){
 
 		else{
 
-		LeftDrive = abs(vexRT(Ch3)) > 20 ? vexRT(Ch3) : 0;
+			LeftDrive = abs(vexRT(Ch3)) > 20 ? vexRT(Ch3) : 0;
 
-		RightDrive = abs(vexRT(Ch2)) > 20 ? vexRT(Ch2) : 0;
+			RightDrive = abs(vexRT(Ch2)) > 20 ? vexRT(Ch2) : 0;
 
 		}
 
@@ -754,7 +917,7 @@ task clawcontrol(){
 
 				Claw_Power = ((Claw_Position - Claw_Current) * Claw_kP);
 
-			Claw_Power = Claw_Power < 0 ? 0 : Claw_Power;
+				Claw_Power = Claw_Power < 0 ? 0 : Claw_Power;
 
 			}
 
@@ -762,7 +925,7 @@ task clawcontrol(){
 
 				Claw_Power = ((Claw_Position - Claw_Current) * Claw_kP * 1.05);
 
-			Claw_Power = Claw_Power > 0 ? 0 : Claw_Power;
+				Claw_Power = Claw_Power > 0 ? 0 : Claw_Power;
 
 			}
 
@@ -778,7 +941,7 @@ task clawcontrol(){
 
 			if(SensorValue(Claw_Pot) > Claw_Closed){
 
-			Claw_Power = Claw_Power > 0 ? 0 : Claw_Power;
+				Claw_Power = Claw_Power > 0 ? 0 : Claw_Power;
 
 			}
 
@@ -786,7 +949,7 @@ task clawcontrol(){
 
 			if(SensorValue(Claw_Pot) < Claw_Open){
 
-			Claw_Power = Claw_Power < 0 ? 0 : Claw_Power;
+				Claw_Power = Claw_Power < 0 ? 0 : Claw_Power;
 
 			}
 
@@ -814,7 +977,7 @@ task liftcontrol(){
 
 			Lift_Current = SensorValue(Lift_Pot);
 
-		DkP = ((Lift_Position - Lift_Current) > 0) ? .1 : .35;
+			DkP = ((Lift_Position - Lift_Current) > 0) ? .1 : .35;
 
 			Lift_Power = (-(Lift_Position - Lift_Current) * DkP + Lift_Hold);
 
@@ -892,21 +1055,21 @@ task DriveControl(){
 
 		if(DriveActive){
 
-		CurrentDriveValue = DriveMode == Line ? SensorValue(rightEncoder) : SensorValue(Gyro);
+			CurrentDriveValue = DriveMode == Line ? SensorValue(rightEncoder) : SensorValue(Gyro);
 
 			DriveDirection = sgn(DrivePower);
 
-		DkP = DriveMode == Line ? LinekP : .2;
+			DkP = DriveMode == Line ? LinekP : .2;
 
 			if(DriveMode == Rotation){
 
-			DkP = DesiredDriveValue > (75 * TurnConst) ? .2 : .25;
+				DkP = DesiredDriveValue > (75 * TurnConst) ? .2 : .25;
 
 			}
 
-		DkI = DriveMode == Line ? 0 : .0;
+			DkI = DriveMode == Line ? 0 : .0;
 
-		BrakingPower = DriveMode == Line ? 20 : 80;
+			BrakingPower = DriveMode == Line ? 20 : 80;
 
 
 
@@ -925,9 +1088,9 @@ task DriveControl(){
 
 			I = IVal * DkI;
 
-		I = I < I_Limit ? I : I_Limit;
+			I = I < I_Limit ? I : I_Limit;
 
-		I = I > -I_Limit ? I : -I_Limit;
+			I = I > -I_Limit ? I : -I_Limit;
 
 			if(abs(P) > LockingThreshold){
 
