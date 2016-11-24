@@ -30,8 +30,8 @@ volatile int Lift_Power;
 #define Lift_UpperLimit 422 //(190)
 #define Lift_Pos1 2631 //(2720)
 #define Lift_Pos2 2016
-#define Lift_Pos3 410
-#define Lift_PosRelease 1000
+#define Lift_Pos3 760
+#define Lift_PosRelease 1300
 volatile bool Break;
 task clawcontrol(); // Close + Open -
 volatile int ClawActive = true;
@@ -540,7 +540,7 @@ task usercontrol(){
 	}
 }
 task clawcontrol(){
-	int Claw_Current; float Claw_kP = 0.28;
+	int Claw_Current; float Claw_kP = 0.2;
 	//Claw_Current = 0;
 	while(true){
 		if(ClawActive){
