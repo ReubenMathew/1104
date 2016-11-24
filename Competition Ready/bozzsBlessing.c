@@ -28,52 +28,30 @@
 task liftcontrol();
 
 volatile int Lift_Position;
-
 int Lift_PositionCount = 1;
-
 volatile int Lift_ControlActive = false;
-
 volatile int Lift_Power;
-
 #define Lift_UpperLimit 1700 //(190)
-
 #define Lift_Pos1 4080 //(2720)
-
 #define Lift_Pos2 3500
-
 #define Lift_Pos3 2200
-
 #define Lift_PosRelease 2700
-
 volatile bool Break;
 
 
 
 task clawcontrol(); // Close + Open -
-
 volatile int ClawActive = true;
-
 volatile int Claw_Position;
-
 volatile int Claw_Power;
-
 #define Claw_Open 1510 //(150)
-
 #define Claw_Closed 4000 //(2310)
-
 #define Claw_ClosedCube 3600
-
 #define Claw_Mid 3000
-
 #define Mid 0
-
 #define Closed 1
-
 #define Open 2
-
 volatile int ClawPos = -1;
-
-
 
 word maxDrivePower = 127;
 long driveTarget = 0;
@@ -108,7 +86,6 @@ task driveThread() {
 		p = error;
 		i = ((error < driveKl) ? (i + (error * dt)) : 0);
 		d = ((error - lastError) / ((dt > 0) ? dt : 1));
-
 		power = ((driveKp * p) + (driveKi * i) + (driveKd * d));
 		turnPower = ((turnKp * turnRatio) * turnError);
 
@@ -238,9 +215,6 @@ void SetDrive(int LeftDrivePower, int RightDrivePower){
 		else
 
 		RightDrivePower = 0;
-
-
-
 		LeftDrivePower = RightDrivePower;
 
 	}
@@ -419,8 +393,6 @@ void SetDriveControl(int Mode, int Value, int Time){
 
 }
 
-
-
 void SetLiftMotors(int Power){
 
 	motor[rightInside] = Power;
@@ -432,165 +404,74 @@ void SetLiftMotors(int Power){
 	motor[leftInside] = Power;
 }
 
-
-
 void SetLiftPosition(int Position){
 
 	Lift_Position = Position;
 
 }
 
-
-
 void Dump(int LiftPos){
 
 	DriveActive = false;
-
 	SetDrive(-120, -120);
-
 	Lift_ControlActive = false;
-
 	Lift_Power = 127;
-
 	clearTimer(T2);
-
 	while(Break == false && time1[T2] < 1000){
-
 		if(SensorValue(Lift_Pot) < Lift_PosRelease){
-
 			ClawPos = Open;
-
 			Claw_Position = Open;
-
 			wait1Msec(500);
-
 			Break = true;
-
 		}
-
 		wait1Msec(20);
-
 	}
-
 	Break = false;
-
 	Lift_ControlActive = true;
-
 	SetLiftPosition(LiftPos);
-
 	wait1Msec(500);
-
 	SetDrive(0, 0);
-
 	wait1Msec(250);
-
 	DriveActive = true;
-
 }
 
-void Auto(){
-
-	//if(SensorValue(AutoPot) < 500){
-
-	//StandardAuto(L);
-
-	/*}
-	else if(SensorValue(AutoPot) < 1000){
-	Elims_FrontAuto(L);
-	}
-	else if(SensorValue(AutoPot) < 1500){
-	Elims_BackAuto(L);
-	}
-	else if(SensorValue(AutoPot) < 2000){
-	ProgrammingSkills();
-	}
-	else if(SensorValue(AutoPot) < 2500){
-	None();
-	}
-	else if(SensorValue(AutoPot) < 3000){
-	Elims_BackAuto(R);
-	}
-	else if(SensorValue(AutoPot) < 3500){
-	Elims_FrontAuto(R);
-	}
-	else{
-	StandardAuto(R);
-	}*/
-
-	//Elim_FrontAuto(L);
-
-}
-
+void Auto(){}
 
 
 string sLStandard = "Standard Left";
-
 string sLElims_Front = "Elims Front Left";
-
 string sLElims_Back = "Elims Back Left";
-
 string sProgrammingSkills = "Skills";
-
 string sNone = "None";
-
 string sRElims_Back = "Elims Back Right";
-
 string sRElims_Front = "Elims Front Right";
-
 string sRStandard = "Standard Right";
-
 string SelectedAuton;
 
-
-
 void DisplayAuto(){
-
 	if(SensorValue(AutoPot) < 500){
-
 		SelectedAuton = sLStandard;
-
 	}
-
 	else if(SensorValue(AutoPot) < 1000){
-
 		SelectedAuton = sLElims_Front;
-
 	}
-
 	else if(SensorValue(AutoPot) < 1500){
-
 		SelectedAuton = sLElims_Back;
-
 	}
-
 	else if(SensorValue(AutoPot) < 2000){
-
 		SelectedAuton = sProgrammingSkills;
-
 	}
-
 	else if(SensorValue(AutoPot) < 2500){
-
 		SelectedAuton = sNone;
-
 	}
-
 	else if(SensorValue(AutoPot) < 3000){
-
 		SelectedAuton = sRElims_Back;
-
 	}
-
 	else if(SensorValue(AutoPot) < 3500){
-
 		SelectedAuton = sRElims_Front;
-
 	}
-
 	else{
-
 		SelectedAuton = sRStandard;
-
 	}
 
 	bLCDBacklight = true;
@@ -639,26 +520,6 @@ void pre_auton(){
 
 }
 
-
-
-/////////////////////////////////////////////////////////////////////////////////////////
-
-//
-
-//																 Autonomous Task
-
-//
-
-// This task is used to control your robot during the autonomous phase of a VEX Competition.
-
-// You must modify the code to add your own robot specific commands here.
-
-//
-
-/////////////////////////////////////////////////////////////////////////////////////////
-
-
-
 task autonomous(){
 
 	startTask(liftcontrol); startTask(clawcontrol); startTask(DriveControl);
@@ -666,25 +527,6 @@ task autonomous(){
 
 
 }
-
-
-
-/////////////////////////////////////////////////////////////////////////////////////////
-
-//
-
-//																 User Control Task
-
-//
-
-// This task is used to control your robot during the user control phase of a VEX Competition.
-
-// You must modify the code to add your own robot specific commands here.
-
-//
-
-/////////////////////////////////////////////////////////////////////////////////////////
-
 task usercontrol(){
 
 	startTask(liftcontrol); startTask(clawcontrol);
