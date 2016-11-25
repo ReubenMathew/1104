@@ -229,7 +229,7 @@ float TurnConst;
 void SetDriveControl(int Mode, int Value, int Time){
 	DriveMode = Mode;
 	SensorValue(rightEncoder) = 0;
-	SensorValue(Gyro) = 0;
+	SensorValue(gyro) = 0;
 	TurnConst = (sgn(Value) == -1) ? NoLoadRightTurnConst : NoLoadLeftTurnConst;
 	DesiredDriveValue = (Mode == Line) ? (Value*360)/10.205 : (Value * TurnConst);
 	clearTimer(T1);
@@ -543,7 +543,7 @@ task autonomous(){
 	stopTask(ProgramChooser);
 	switch(auto) {
 	case 0: RightCube(); break;
-	case 1: RightStrs(); break;
+	case 1: rightStrs(); break;
 	case 2: LeftCube(); break;
 	case 3: LeftStrs(); break;
 	case 4: ProgSkill(); break;
