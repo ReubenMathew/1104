@@ -274,6 +274,8 @@ void Dump(int LiftPos){
 	wait1Msec(250);
 	DriveActive = true;
 }
+
+
 void Auto(){
 
 }
@@ -320,14 +322,18 @@ void RightCube(){
 
 	SetLiftPosition(Lift_Pos1);
 	Lift_ControlActive = true;
+
+	SetLiftPosition(Lift_Pos2-100);
+
+	SetDriveControl(Line, 15, 1);
 	ClawPos = Open;
 	Claw_Position = Claw_Open;
-	//wait1Msec(500);
-	SetDriveControl(Line, 15, 1);
+	wait1Msec(1000);
+
 	ClawPos = Closed;
 	Claw_Position = Claw_Closed;
 	//wait1Msec(300);
-	SetLiftPosition(Lift_Pos2-100);
+	wait1Msec(1000);
 	RotateAngle(90,1000,100);
 	wait1Msec(500);
 
@@ -355,10 +361,9 @@ void RightCube(){
 	SetDriveControl(Line, -14, 2);
 	wait1Msec(400);
 	SetLiftPosition(Lift_Pos3+200);
-	wait1Msec(750);
+	wait1Msec(1050);
 	ClawPos = Open;
 	Claw_Position = Claw_Open;
-
 }
 
 
@@ -420,6 +425,7 @@ void LeftStrs(){
 	wait1Msec(1000);
 	ClawPos = Open;
 	Claw_Position = Claw_Open;
+
 
 }
 
@@ -539,6 +545,8 @@ void pre_auton(){
 /////////////////////////////////////////////////////////////////////////////////////////
 task autonomous(){
 	startTask(liftcontrol); startTask(clawcontrol); startTask(DriveControl);
+
+
 
 	stopTask(ProgramChooser);
 	switch(auto) {
