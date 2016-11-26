@@ -37,10 +37,10 @@ task clawcontrol(); // Close + Open -
 volatile int ClawActive = true;
 volatile int Claw_Position;
 volatile int Claw_Power;
-#define Claw_Open 2950 //(150)
-#define Claw_Closed 660 //(2310)
+#define Claw_Open 3100 //(150)
+#define Claw_Closed 650//(2310)
 #define Claw_ClosedCube 800
-#define Claw_Mid 1700
+#define Claw_Mid 1800
 #define Mid 0
 #define Closed 1
 #define Open 2
