@@ -505,9 +505,10 @@ void ProgSkill(){
 
 	Lift_ControlActive = true;
 	SetLiftPosition(Lift_Pos2);
+	SetDriveControl(Line, 15, 1);
 	sleep(750);
-		SetLiftPosition(Lift_Pos1);
-		sleep(750);
+	SetLiftPosition(Lift_Pos1);
+	sleep(750);
 	RotateAngle(93,1000,100);
 	sleep(150);
 	rightStrs();
@@ -525,48 +526,69 @@ void ProgSkill(){
 }
 
 
-void test1(){
-	Lift_ControlActive = true;
-	SetLiftPosition(Lift_Pos2);
-	sleep(750);
-		SetLiftPosition(Lift_Pos1);
-		sleep(750);
-	RotateAngle(94,1000,100);
+void progSkillsV2(){
 
+	SetLiftPosition(Lift_Pos1);
+
+	Lift_ControlActive = true;
+
+	SetLiftPosition(Lift_Pos2-100);
+
+	SetDriveControl(Line, 15, 1);
+	ClawPos = Open;
+	Claw_Position = Claw_Open;
+	wait1Msec(1000);
+
+	ClawPos = Closed;
+	Claw_Position = Claw_Closed;
+	//wait1Msec(300);
+	wait1Msec(1000);
+	RotateAngle(90,1000,100);
+	wait1Msec(500);
+
+	ClawPos = Open;
+	Claw_Position = Claw_Open;
+	wait1Msec(300);
+
+	SetLiftPosition(Lift_Pos1);
+
+	wait1Msec(500);
+	SetDriveControl(Line, 15, 1);
+	ClawPos = Closed;
+	Claw_Position = Claw_ClosedCube;
+	wait1Msec(300);
+	SetLiftPosition(Lift_Pos2);
+	wait1Msec(300);
+	//RotateAngle(90,1000,100);
+	SetDriveControl(Line, -28, 2);
+	wait1Msec(700);
+	RotateAngle(88,1000,100);
+	//RotateAngle(-10,1000,100);
+	SetDriveControl(Line, -14, 2);
+	wait1Msec(400);
+	SetLiftPosition(Lift_Pos3+200);
+	wait1Msec(1050);
+	ClawPos = Open;
+	Claw_Position = Claw_Open;
 }
 
 
-/////////////////////////////////////////////////////////////////////////////////////////
-//
-//                          Pre-Autonomous Functions
-//
-// You may want to perform some actions before the competition starts. Do them in the
-// following function.
-//
-/////////////////////////////////////////////////////////////////////////////////////////
+
 void pre_auton(){
 	SensorType(in3) = sensorNone;
-	wait1Msec(2000);
+	wait1Msec(1000);
 	SensorType(in3) = sensorGyro;
 	wait1Msec(1000);
 	bStopTasksBetweenModes = true;
 	SensorValue(rightEncoder) = 0;
 	//DisplayAuto();
-	startTask(ProgramChooser);
+	// temporary	startTask(ProgramChooser);
 }
-/////////////////////////////////////////////////////////////////////////////////////////
-//
-//                                 Autonomous Task
-//
-// This task is used to control your robot during the autonomous phase of a VEX Competition.
-// You must modify the code to add your own robot specific commands here.
-//
-/////////////////////////////////////////////////////////////////////////////////////////
+
 task autonomous(){
 	startTask(liftcontrol); startTask(clawcontrol); startTask(DriveControl);
-
-
-
+	progSkillsV2();
+	/*
 	stopTask(ProgramChooser);
 	switch(auto) {
 	case 0: RightCube(); break;
@@ -574,17 +596,13 @@ task autonomous(){
 	case 2: LeftCube(); break;
 	case 3: LeftStrs(); break;
 	case 4: ProgSkill(); break;
-	case 5: test1(); break;
+	case 5: progSkillsV2(); break;
+
 	}
+	*/
 }
-/////////////////////////////////////////////////////////////////////////////////////////
-//
-//                                 User Control Task
-//
-// This task is used to control your robot during the user control phase of a VEX Competition.
-// You must modify the code to add your own robot specific commands here.
-//
-/////////////////////////////////////////////////////////////////////////////////////////
+
+
 task usercontrol(){
 	startTask(liftcontrol); startTask(clawcontrol);
 	bool Lift_Toggle1 = false; bool Lift_Toggle2 = false;
