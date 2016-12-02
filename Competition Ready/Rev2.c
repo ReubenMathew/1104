@@ -31,7 +31,7 @@ volatile int Lift_Power;
 #define Lift_Pos1 2631 //(2720)
 #define Lift_Pos2 2016
 #define Lift_Pos3 760
-#define Lift_PosRelease 850
+#define Lift_PosRelease 1050
 volatile bool Break;
 task clawcontrol(); // Close + Open -
 volatile int ClawActive = true;
@@ -88,6 +88,7 @@ task ProgramChooser() {
 		case 2: autoName = "[Left Cube]"; break;
 		case 3: autoName = "[Left Stars]" ; break;
 		case 4: autoName = "[Prog Skills]"; break;
+		case 5: autoName = "[testing]"; break;
 		default: autoName = "None"; break;
 		}
 		displayLCDCenteredString(0,autoName);
@@ -497,8 +498,18 @@ void PreloadDump(int time, float distance){
 	sleep(2000);
 	DumpAuto(time);
 }
+
+
+
 void ProgSkill(){
 
+	Lift_ControlActive = true;
+	SetLiftPosition(Lift_Pos2);
+	sleep(750);
+		SetLiftPosition(Lift_Pos1);
+		sleep(750);
+	RotateAngle(93,1000,100);
+	sleep(150);
 	rightStrs();
 	sleep(1000);
 	SetLiftPosition(Lift_Pos1);
@@ -506,15 +517,23 @@ void ProgSkill(){
 	Claw_Position = Claw_Mid;
 	sleep(1000);
 	PreloadDump(1200,26);
-	sleep(2000);
+	sleep(1000);
 	PreloadDump(1200,24);
-	sleep(2000);
+	sleep(1000);
 	PreloadDump(1000,24);
-	sleep(2000);
-
-
+	sleep(1000);
 }
 
+
+void test1(){
+	Lift_ControlActive = true;
+	SetLiftPosition(Lift_Pos2);
+	sleep(750);
+		SetLiftPosition(Lift_Pos1);
+		sleep(750);
+	RotateAngle(94,1000,100);
+
+}
 
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -555,13 +574,8 @@ task autonomous(){
 	case 2: LeftCube(); break;
 	case 3: LeftStrs(); break;
 	case 4: ProgSkill(); break;
-
+	case 5: test1(); break;
 	}
-
-
-
-
-
 }
 /////////////////////////////////////////////////////////////////////////////////////////
 //
