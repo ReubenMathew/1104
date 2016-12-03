@@ -325,10 +325,10 @@ void RightCube(){
 
 	SetLiftPosition(Lift_Pos2-100);
 
-	SetDriveControl(Line, 15, 1);
+	SetDriveControl(Line, 10, 1);
 	ClawPos = Open;
 	Claw_Position = Claw_Open;
-	wait1Msec(1000);
+	wait1Msec(750);
 
 	ClawPos = Closed;
 	Claw_Position = Claw_Closed;
@@ -341,10 +341,7 @@ void RightCube(){
 	Claw_Position = Claw_Open;
 	wait1Msec(300);
 
-
-
 	SetLiftPosition(Lift_Pos1);
-
 
 	wait1Msec(500);
 	SetDriveControl(Line, 15, 1);
@@ -368,14 +365,15 @@ void RightCube(){
 
 
 void rightStrs(){
-
+	SetDriveControl(Line, -3, 1);
+	sleep(250);
 	SetLiftPosition(Lift_Pos1);
 	Lift_ControlActive = true;
 	ClawPos = Open;
 	Claw_Position = Claw_Mid;
 	wait1Msec(800);
 	//wait1Msec(500);
-	SetDriveControl(Line, 26, 1);
+	SetDriveControl(Line, 24.5, 1);
 	wait1Msec(1200);
 
 	ClawPos = Open;
@@ -383,15 +381,15 @@ void rightStrs(){
 	wait1Msec(500);
 	SetLiftPosition(Lift_Pos2);
 	wait1Msec(600);
-	SetDriveControl(Line, -27.5, 1);
+	SetDriveControl(Line, -25, 1);
 	wait1Msec(1500);
 	RotateAngle(75,1000,100);
 
 	wait1Msec(600);
 	SetDriveControl(Line, -26, 1);
-	wait1Msec(1500);
+	wait1Msec(2000);
 
-	SetLiftPosition(Lift_Pos3+200);
+	SetLiftPosition(Lift_Pos3+150);
 	wait1Msec(1000);
 	ClawPos = Open;
 	Claw_Position = Claw_Open;
@@ -498,7 +496,7 @@ void PreloadDump(int time, float distance){
 	DumpAuto(time);
 }
 void ProgSkill(){
-
+/*
 	rightStrs();
 	sleep(1000);
 	SetLiftPosition(Lift_Pos1);
@@ -511,7 +509,16 @@ void ProgSkill(){
 	sleep(2000);
 	PreloadDump(1000,24);
 	sleep(2000);
+*/
+	SetLiftPosition(Lift_Pos1);
+	Lift_ControlActive = true;
 
+	SetLiftPosition(Lift_Pos2-100);
+
+	SetDriveControl(Line, 10, 1);
+	ClawPos = Open;
+	Claw_Position = Claw_Open;
+	wait1Msec(750);
 
 }
 

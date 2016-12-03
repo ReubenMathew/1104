@@ -326,7 +326,7 @@ void RightCube(){
 
 	SetLiftPosition(Lift_Pos2-100);
 
-	SetDriveControl(Line, 15, 1);
+	SetDriveControl(Line, 10, 1);
 	ClawPos = Open;
 	Claw_Position = Claw_Open;
 	wait1Msec(1000);
@@ -334,7 +334,7 @@ void RightCube(){
 	ClawPos = Closed;
 	Claw_Position = Claw_Closed;
 	//wait1Msec(300);
-	wait1Msec(1000);
+	wait1Msec(750);
 	RotateAngle(90,1000,100);
 	wait1Msec(500);
 
@@ -369,7 +369,8 @@ void RightCube(){
 
 
 void rightStrs(){
-
+	SetDriveControl(Line, -2, 1);
+	sleep(500);
 	SetLiftPosition(Lift_Pos1);
 	Lift_ControlActive = true;
 	ClawPos = Open;
@@ -587,7 +588,7 @@ void pre_auton(){
 
 task autonomous(){
 	startTask(liftcontrol); startTask(clawcontrol); startTask(DriveControl);
-	progSkillsV2();
+	RightCube();
 	/*
 	stopTask(ProgramChooser);
 	switch(auto) {
