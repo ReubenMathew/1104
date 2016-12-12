@@ -28,9 +28,9 @@ int Lift_PositionCount = 1;
 volatile int Lift_ControlActive = false;
 volatile int Lift_Power;
 #define Lift_UpperLimit 422 //(190)
-#define Lift_Pos1 2631 //(2720)
+#define Lift_Pos1 2700 //(2720)
 #define Lift_Pos2 2016
-#define Lift_Pos3 760
+#define Lift_Pos3 420
 #define Lift_PosRelease 850
 volatile bool Break;
 task clawcontrol(); // Close + Open -
@@ -86,7 +86,7 @@ task ProgramChooser() {
 		case 0: autoName = "[Right Cube]"; break;
 		case 1: autoName = "[Right Stars]"; break;
 		case 2: autoName = "[Left Cube]"; break;
-		case 3: autoName = "[Left Stars]" ; break;
+		case 3: autoName = "[Left Cone]" ; break;
 		case 4: autoName = "[Prog Skills]"; break;
 		default: autoName = "None"; break;
 		}
@@ -325,9 +325,9 @@ void RightCube(){
 
 	SetLiftPosition(Lift_Pos2-100);
 
-	SetDriveControl(Line, 10, 1);
+	SetDriveControl(Line, 16, 1);
 	ClawPos = Open;
-	Claw_Position = Claw_Open;
+	Claw_Position = Claw_Open-100;
 	wait1Msec(750);
 
 	ClawPos = Closed;
@@ -355,13 +355,15 @@ void RightCube(){
 	wait1Msec(700);
 	RotateAngle(88,1000,100);
 	//RotateAngle(-10,1000,100);
-	SetDriveControl(Line, -14, 2);
+	SetDriveControl(Line, -17, 2);
 	wait1Msec(400);
 	SetLiftPosition(Lift_Pos3+200);
 	wait1Msec(1050);
 	ClawPos = Open;
 	Claw_Position = Claw_Open;
-}
+	sleep(200);
+		SetLiftPosition(Lift_Pos1);
+	}
 
 
 void rightStrs(){
@@ -395,16 +397,69 @@ void rightStrs(){
 	Claw_Position = Claw_Open;
 }
 
-void LeftStrs(){
+void LeftCone(){
+sleep(6666);
+SetLiftPosition(Lift_Pos1);
+	Lift_ControlActive = true;
+
+	SetLiftPosition(Lift_Pos2-100);
+
+	SetDriveControl(Line, 16, 1);
+	ClawPos = Open;
+	Claw_Position = Claw_Open-100;
+	wait1Msec(750);
+
+	ClawPos = Closed;
+	Claw_Position = Claw_Closed;
+	//wait1Msec(300);
+	wait1Msec(1000);
+	RotateAngle(-95,1000,100);
+	wait1Msec(500);
+
+	ClawPos = Open;
+	Claw_Position = Claw_Open;
+	wait1Msec(300);
 
 	SetLiftPosition(Lift_Pos1);
-	Lift_ControlActive = true;
+
+	wait1Msec(500);
+	SetDriveControl(Line, 15, 1);
+	ClawPos = Closed;
+	Claw_Position = Claw_ClosedCube;
+	wait1Msec(300);
+	SetLiftPosition(Lift_Pos2);
+	wait1Msec(300);
+	//RotateAngle(90,1000,100);
+	SetDriveControl(Line, -28, 2);
+	wait1Msec(700);
+	RotateAngle(-88,1000,100);
+	//RotateAngle(-10,1000,100);
+	SetDriveControl(Line, -17, 2);
+	wait1Msec(400);
+	SetLiftPosition(Lift_Pos3+200);
+	wait1Msec(1050);
 	ClawPos = Open;
-	Claw_Position = Claw_Mid;
-	wait1Msec(1500);
-	//wait1Msec(500);
-	SetDriveControl(Line, 26, 1);
-	wait1Msec(1200);
+	Claw_Position = Claw_Open;
+	sleep(200);
+		SetLiftPosition(Lift_Pos1);
+
+
+
+/*
+	SetLiftPosition(Lift_Pos1);
+	Lift_ControlActive = true;
+
+	SetLiftPosition(Lift_Pos2-100);
+
+	SetDriveControl(Line, 13, 1);
+	ClawPos = Open;
+	Claw_Position = Claw_Open;
+	wait1Msec(750);
+
+	ClawPos = Closed;
+	Claw_Position = Claw_Closed;
+	//wait1Msec(300);
+	wait1Msec(1000);
 
 	ClawPos = Open;
 	Claw_Position = Claw_Closed;
@@ -423,12 +478,12 @@ void LeftStrs(){
 	wait1Msec(1000);
 	ClawPos = Open;
 	Claw_Position = Claw_Open;
-
+*/
 
 }
 
 void LeftCube(){
-
+/*
 	SetLiftPosition(Lift_Pos1);
 	Lift_ControlActive = true;
 	ClawPos = Open;
@@ -469,7 +524,21 @@ void LeftCube(){
 	wait1Msec(750);
 	ClawPos = Open;
 	Claw_Position = Claw_Open;
+*/
+SetLiftPosition(Lift_Pos1);
+	Lift_ControlActive = true;
 
+	SetLiftPosition(Lift_Pos2-100);
+
+	SetDriveControl(Line, 16, 1);
+	ClawPos = Open;
+	Claw_Position = Claw_Open-100;
+	wait1Msec(750);
+
+	ClawPos = Closed;
+	Claw_Position = Claw_Closed;
+	//wait1Msec(300);
+	wait1Msec(1000);
 }
 
 void DumpAuto(int time){
@@ -560,7 +629,7 @@ task autonomous(){
 	case 0: RightCube(); break;
 	case 1: rightStrs(); break;
 	case 2: LeftCube(); break;
-	case 3: LeftStrs(); break;
+	case 3: LeftCone(); break;
 	case 4: ProgSkill(); break;
 
 	}

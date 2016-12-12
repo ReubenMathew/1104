@@ -14,11 +14,5 @@ int ticks = numOfRevolutions*90;
   //This basically sends the value to the encoders
   /* what this basically means is.... until the encoder reaches a certain number of ticks we run the motors and a specified power
   when the encoders reach this certain target the motors will stop running */
-while((SensorValue[leftEncoder]<ticks)||(SensorValue[rightEncoder]<ticks))
-{
 
-motor[leftDrive] = power;
-motor[rightDrive] = power;
-
-}
 }
