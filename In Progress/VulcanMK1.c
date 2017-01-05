@@ -33,6 +33,7 @@ volatile int Lift_Power;
 #define Lift_Pos3 1849
 #define Lift_PosRelease 1400
 #define Lift_EncoderZero 0
+#define Lift_HardStop 1850
 volatile bool Break;
 task clawcontrol(); // Close + Open -
 volatile int ClawActive = true;
@@ -367,8 +368,8 @@ void RightCube(){
 	ClawPos = Open;
 	Claw_Position = Claw_Open;
 	sleep(200);
-		SetLiftPosition(Lift_Pos1);
-	}
+	SetLiftPosition(Lift_Pos1);
+}
 
 
 void rightStrs(){
@@ -403,8 +404,8 @@ void rightStrs(){
 }
 
 void LeftCone(){
-sleep(6666);
-SetLiftPosition(Lift_Pos1);
+	sleep(6666);
+	SetLiftPosition(Lift_Pos1);
 	Lift_ControlActive = true;
 
 	SetLiftPosition(Lift_Pos2-100);
@@ -446,11 +447,11 @@ SetLiftPosition(Lift_Pos1);
 	ClawPos = Open;
 	Claw_Position = Claw_Open;
 	sleep(200);
-		SetLiftPosition(Lift_Pos1);
+	SetLiftPosition(Lift_Pos1);
 
 
 
-/*
+	/*
 	SetLiftPosition(Lift_Pos1);
 	Lift_ControlActive = true;
 
@@ -483,12 +484,12 @@ SetLiftPosition(Lift_Pos1);
 	wait1Msec(1000);
 	ClawPos = Open;
 	Claw_Position = Claw_Open;
-*/
+	*/
 
 }
 
 void LeftCube(){
-/*
+	/*
 	SetLiftPosition(Lift_Pos1);
 	Lift_ControlActive = true;
 	ClawPos = Open;
@@ -529,8 +530,8 @@ void LeftCube(){
 	wait1Msec(750);
 	ClawPos = Open;
 	Claw_Position = Claw_Open;
-*/
-SetLiftPosition(Lift_Pos1);
+	*/
+	SetLiftPosition(Lift_Pos1);
 	Lift_ControlActive = true;
 
 	SetLiftPosition(Lift_Pos2-100);
@@ -570,7 +571,7 @@ void PreloadDump(int time, float distance){
 	DumpAuto(time);
 }
 void ProgSkill(){
-/*
+	/*
 	rightStrs();
 	sleep(1000);
 	SetLiftPosition(Lift_Pos1);
@@ -583,7 +584,7 @@ void ProgSkill(){
 	sleep(2000);
 	PreloadDump(1000,24);
 	sleep(2000);
-*/
+	*/
 	SetLiftPosition(Lift_Pos1);
 	Lift_ControlActive = true;
 
@@ -658,23 +659,43 @@ task usercontrol(){
 	startTask(liftcontrol); startTask(clawcontrol);
 	bool Lift_Toggle1 = false; bool Lift_Toggle2 = false;
 	bool Claw_Toggle = false; ClawPos = -1;
+	int buttonToggleState = 1; int buttonPressed = 0;
 	int LeftDrive; int RightDrive;
+	SensorValue[Lift_Enc] = 0;
+	sleep(50);
+
 	while (true){
+
+		if(vexRT[Btn7L] == 1){
+			if(!buttonPressed ){
+				buttonToggleState = 1 - buttonToggleState;
+				buttonPressed = 1;
+			}
+			}else{
+			buttonPressed = 0;
+		}
+
 		if(vexRT(Btn8R) == true){
 			LeftDrive = 60;
 			RightDrive = -60;
 		}
 		else{
-			LeftDrive = abs(vexRT(Ch3)) > 20 ? vexRT(Ch3) : 0;
-			RightDrive = abs(vexRT(Ch2)) > 20 ? vexRT(Ch2) : 0;
+			LeftDrive = abs(vexRT(Ch3)) > 25 ? vexRT(Ch3) : 0;
+			RightDrive = abs(vexRT(Ch2)) > 25 ? vexRT(Ch2) : 0;
 		}
 		SetDrive(LeftDrive, RightDrive);
 		if(vexRT(Btn5U) == 1){
-			Lift_ControlActive = false;
-			Lift_PositionCount = 1;
-			Lift_Power = -127;
 			if(SensorValue(Lift_Enc) > Lift_PosRelease){
 				ClawPos = Open;
+			}
+			if(SensorValue[Lift_Enc] > Lift_HardStop && buttonToggleState == 1){
+				Lift_ControlActive = true;
+				Lift_PositionCount = 3;
+				Lift_Power = 0;
+				}else{
+				Lift_ControlActive = false;
+				Lift_PositionCount = 1;
+				Lift_Power = -127;
 			}
 		}
 		else if (vexRT(Btn5D) == 1){
