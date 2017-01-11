@@ -661,7 +661,6 @@ task usercontrol(){
 	bool Claw_Toggle = false; ClawPos = -1;
 	int buttonToggleState = 1; int buttonPressed = 0;
 	int LeftDrive; int RightDrive;
-	SensorValue[Lift_Enc] = 0;
 	sleep(50);
 
 	while (true){
