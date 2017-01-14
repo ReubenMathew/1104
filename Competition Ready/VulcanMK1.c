@@ -1,10 +1,10 @@
 #pragma config(Sensor, in3,    gyro,           sensorGyro)
 #pragma config(Sensor, in4,    Claw_Pot,       sensorPotentiometer)
 #pragma config(Sensor, in6,    AutoPot,        sensorPotentiometer)
-#pragma config(Sensor, dgtl1,  rightEncoder,   sensorQuadEncoder)
-#pragma config(Sensor, dgtl3,  leftEncoder,    sensorQuadEncoder)
-#pragma config(Sensor, dgtl5,  Lift_Switch,    sensorTouch)
+#pragma config(Sensor, dgtl1,  leftEncoder,    sensorQuadEncoder)
+#pragma config(Sensor, dgtl4,  rightEncoder,   sensorQuadEncoder)
 #pragma config(Sensor, dgtl6,  Lift_Enc,       sensorQuadEncoder)
+#pragma config(Sensor, dgtl8,  Lift_Switch,    sensorTouch)
 #pragma config(Motor,  port1,           clawLeft,      tmotorVex393HighSpeed_HBridge, openLoop)
 #pragma config(Motor,  port2,           rightInside,   tmotorVex393_MC29, openLoop)
 #pragma config(Motor,  port3,           leftOutside,   tmotorVex393_MC29, openLoop, reversed)
@@ -39,10 +39,10 @@ task clawcontrol(); // Close + Open -
 volatile int ClawActive = true;
 volatile int Claw_Position;
 volatile int Claw_Power;
-#define Claw_Open 4000 //(150)
-#define Claw_Closed 1670//(2310)
+#define Claw_Open 3600 //(150)
+#define Claw_Closed 1300//(2310)
 #define Claw_ClosedCube 1930
-#define Claw_Mid 2670
+#define Claw_Mid 2300
 #define Mid 0
 #define Closed 1
 #define Open 2
@@ -73,11 +73,11 @@ task ProgramChooser() {
 		if (nLCDButtons == LCD_LEFT) {
 			while (nLCDButtons != 0) {
 			}
-			auto --;
+			auto--;
 			} else if (nLCDButtons == LCD_RIGHT) {
 			while (nLCDButtons != 0) {
 			}
-			auto ++;
+			auto++;
 			} else if (nLCDButtons == LCD_CENTER) {
 			while(nLCDButtons != 0) {
 			}
@@ -239,6 +239,7 @@ void SetDriveControl(int Mode, int Value, int Time){
 	TurnConst = (sgn(Value) == -1) ? NoLoadRightTurnConst : NoLoadLeftTurnConst;
 	DesiredDriveValue = (Mode == Line) ? (Value*360)/10.205 : (Value * TurnConst);
 	clearTimer(T1);
+
 	BreakLoop = false;
 	DriveActive = true;
 	while(BreakLoop == false && time1[T1] < (Time*1000)){
@@ -489,6 +490,17 @@ void LeftCone(){
 }
 
 void LeftCube(){
+
+	Lift_ControlActive = true;
+ClawPos = Open;
+SetLiftPosition(Lift_Pos2);
+Claw_Position = Claw_Mid;
+	SetLiftPosition(Lift_Pos1);
+SetDriveControl(Line, 3, 1);
+	sleep(250);
+	SetLiftPosition(Lift_Pos1);
+
+
 	/*
 	SetLiftPosition(Lift_Pos1);
 	Lift_ControlActive = true;
@@ -530,7 +542,7 @@ void LeftCube(){
 	wait1Msec(750);
 	ClawPos = Open;
 	Claw_Position = Claw_Open;
-	*/
+
 	SetLiftPosition(Lift_Pos1);
 	Lift_ControlActive = true;
 
@@ -545,6 +557,7 @@ void LeftCube(){
 	Claw_Position = Claw_Closed;
 	//wait1Msec(300);
 	wait1Msec(1000);
+	*/
 }
 
 void DumpAuto(int time){
@@ -597,16 +610,6 @@ void ProgSkill(){
 
 }
 
-
-
-/////////////////////////////////////////////////////////////////////////////////////////
-//
-//                          Pre-Autonomous Functions
-//
-// You may want to perform some actions before the competition starts. Do them in the
-// following function.
-//
-/////////////////////////////////////////////////////////////////////////////////////////
 void pre_auton(){
 	SensorType(in3) = sensorNone;
 	wait1Msec(1000);
@@ -619,18 +622,10 @@ void pre_auton(){
 	//DisplayAuto();
 	startTask(ProgramChooser);
 }
-/////////////////////////////////////////////////////////////////////////////////////////
-//
-//                                 Autonomous Task
-//
-// This task is used to control your robot during the autonomous phase of a VEX Competition.
-// You must modify the code to add your own robot specific commands here.
-//
-/////////////////////////////////////////////////////////////////////////////////////////
+
+
 task autonomous(){
 	startTask(liftcontrol); startTask(clawcontrol); startTask(DriveControl);
-
-
 
 	stopTask(ProgramChooser);
 	switch(auto) {
@@ -641,20 +636,8 @@ task autonomous(){
 	case 4: ProgSkill(); break;
 
 	}
-
-
-
-
-
 }
-/////////////////////////////////////////////////////////////////////////////////////////
-//
-//                                 User Control Task
-//
-// This task is used to control your robot during the user control phase of a VEX Competition.
-// You must modify the code to add your own robot specific commands here.
-//
-/////////////////////////////////////////////////////////////////////////////////////////
+
 task usercontrol(){
 	startTask(liftcontrol); startTask(clawcontrol);
 	bool Lift_Toggle1 = false; bool Lift_Toggle2 = false;
@@ -710,10 +693,14 @@ task usercontrol(){
 		if(vexRT(Btn8U) == 1){
 			ClawPos = Mid;
 		}
+		if(ClawPos == 3){
+			ClawPos = Mid;
+		}
+
 		if(vexRT(Btn6U) == 1){
 			if(Claw_Toggle == false){
 				ClawPos++;
-				if(ClawPos > 2){
+				if(ClawPos > 3){
 					ClawPos = 1;
 				}
 				Claw_Toggle = true;
@@ -767,11 +754,6 @@ task usercontrol(){
 		case 3:
 			SetLiftPosition(Lift_Pos3);
 			break;
-		}
-		if(vexRT(Btn8L) == 1){
-			startTask(DriveControl);
-			Auto();
-			stopTask(DriveControl);
 		}
 	}
 }
