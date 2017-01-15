@@ -2,9 +2,9 @@
 #pragma config(Sensor, in4,    Claw_Pot,       sensorPotentiometer)
 #pragma config(Sensor, in6,    AutoPot,        sensorPotentiometer)
 #pragma config(Sensor, dgtl1,  leftEncoder,    sensorQuadEncoder)
-#pragma config(Sensor, dgtl4,  rightEncoder,   sensorQuadEncoder)
+#pragma config(Sensor, dgtl3,  Lift_Switch,    sensorTouch)
 #pragma config(Sensor, dgtl6,  Lift_Enc,       sensorQuadEncoder)
-#pragma config(Sensor, dgtl8,  Lift_Switch,    sensorTouch)
+#pragma config(Sensor, dgtl11, rightEncoder,   sensorQuadEncoder)
 #pragma config(Motor,  port1,           clawLeft,      tmotorVex393HighSpeed_HBridge, openLoop)
 #pragma config(Motor,  port2,           rightInside,   tmotorVex393_MC29, openLoop)
 #pragma config(Motor,  port3,           leftOutside,   tmotorVex393_MC29, openLoop, reversed)
@@ -117,6 +117,7 @@ const unsigned int TrueSpeed[128] =
 	80, 81, 83, 84, 84, 86, 86, 87, 87, 88,
 	88, 89, 89, 90, 90, 127, 127, 127
 };
+
 void SetDrive(int LeftDrivePower, int RightDrivePower){
 	LeftDrivePower = LeftDrivePower > 127 ? 127 : LeftDrivePower;
 	LeftDrivePower = LeftDrivePower < -127 ? -127 : LeftDrivePower;
@@ -326,19 +327,25 @@ void DisplayAuto(){
 }
 
 void RightCube(){
-
+	ClawPos = Open;
+	Claw_Position = Claw_Open+300;
+	sleep(1000);
 	SetLiftPosition(Lift_Pos1);
 	Lift_ControlActive = true;
 
 	SetLiftPosition(Lift_Pos2-100);
-
-	SetDriveControl(Line, 16, 1);
+	SetDriveControl(Line, 20, 1);
+	/*
+	SetDrive(127,127);
+	sleep(400);27);
+	sleep(100);
+	SetDrive(-127,-1
+	SetDrive(0,0);
+	sleep(10);
+	*/
 	ClawPos = Open;
-	Claw_Position = Claw_Open-100;
+	Claw_Position = Claw_Open+300;
 	wait1Msec(750);
-
-	ClawPos = Closed;
-	Claw_Position = Claw_Closed;
 	//wait1Msec(300);
 	wait1Msec(1000);
 	RotateAngle(90,1000,100);
@@ -358,11 +365,11 @@ void RightCube(){
 	SetLiftPosition(Lift_Pos2);
 	wait1Msec(300);
 	//RotateAngle(90,1000,100);
-	SetDriveControl(Line, -28, 2);
+	SetDriveControl(Line, -30, 2);
 	wait1Msec(700);
 	RotateAngle(88,1000,100);
 	//RotateAngle(-10,1000,100);
-	SetDriveControl(Line, -17, 2);
+	SetDriveControl(Line, -20, 2);
 	wait1Msec(400);
 	SetLiftPosition(Lift_Pos3+200);
 	wait1Msec(1050);
@@ -374,6 +381,7 @@ void RightCube(){
 
 
 void rightStrs(){
+	sleep(4000);
 	SetDriveControl(Line, -3, 1);
 	sleep(250);
 	SetLiftPosition(Lift_Pos1);
@@ -405,52 +413,23 @@ void rightStrs(){
 }
 
 void LeftCone(){
-	sleep(6666);
-	SetLiftPosition(Lift_Pos1);
+
 	Lift_ControlActive = true;
+	SetLiftPosition(Lift_Pos1);
+	SetDriveControl(Line, -3 , 1);
+	sleep(1000);
+	Claw_Position = Claw_Open;
+		ClawPos = Open;
+	sleep(1000);
 
-	SetLiftPosition(Lift_Pos2-100);
-
-	SetDriveControl(Line, 16, 1);
-	ClawPos = Open;
-	Claw_Position = Claw_Open-100;
-	wait1Msec(750);
-
-	ClawPos = Closed;
+	SetDriveControl(Line, 10 , 1);
+	sleep(1700);
 	Claw_Position = Claw_Closed;
-	//wait1Msec(300);
-	wait1Msec(1000);
-	RotateAngle(-95,1000,100);
-	wait1Msec(500);
-
-	ClawPos = Open;
-	Claw_Position = Claw_Open;
-	wait1Msec(300);
-
-	SetLiftPosition(Lift_Pos1);
-
-	wait1Msec(500);
-	SetDriveControl(Line, 15, 1);
-	ClawPos = Closed;
-	Claw_Position = Claw_ClosedCube;
-	wait1Msec(300);
 	SetLiftPosition(Lift_Pos2);
-	wait1Msec(300);
-	//RotateAngle(90,1000,100);
-	SetDriveControl(Line, -28, 2);
-	wait1Msec(700);
-	RotateAngle(-88,1000,100);
-	//RotateAngle(-10,1000,100);
-	SetDriveControl(Line, -17, 2);
-	wait1Msec(400);
-	SetLiftPosition(Lift_Pos3+200);
-	wait1Msec(1050);
-	ClawPos = Open;
-	Claw_Position = Claw_Open;
-	sleep(200);
-	SetLiftPosition(Lift_Pos1);
-
-
+	RotateAngle(-85 , 1000 , 80);
+	SetDriveControl(Line , -20 , 1);
+	sleep(1700);
+	SetLiftPosition(Lift_Pos3);
 
 	/*
 	SetLiftPosition(Lift_Pos1);
@@ -491,15 +470,21 @@ void LeftCone(){
 
 void LeftCube(){
 
-	Lift_ControlActive = true;
-ClawPos = Open;
-SetLiftPosition(Lift_Pos2);
-Claw_Position = Claw_Mid;
-	SetLiftPosition(Lift_Pos1);
-SetDriveControl(Line, 3, 1);
+	/*SetDriveControl(Line, -3, 1);
 	sleep(250);
 	SetLiftPosition(Lift_Pos1);
-
+	Lift_ControlActive = true;
+	ClawPos = Open;
+	Claw_Position = Claw_Mid;
+	wait1Msec(800);
+	//wait1Msec(500);
+	SetDriveControl(Line, 12, 1);
+	wait1Msec(1200);
+	*/
+	SetDriveControl(Line, 20, 1);
+	sleep(2000);
+	ClawPos = Open;
+	Claw_Position = Claw_Open;
 
 	/*
 	SetLiftPosition(Lift_Pos1);
@@ -644,15 +629,20 @@ task usercontrol(){
 	bool Claw_Toggle = false; ClawPos = -1;
 	int buttonToggleState = 1; int buttonPressed = 0;
 	int LeftDrive; int RightDrive;
-	SensorValue[Lift_Enc] = 0;
 	sleep(50);
 
 	while (true){
+
+		if(vexRT[Btn7D]){
+			SensorValue[Lift_Enc] = 0;
+		}
 
 		if(vexRT[Btn7L] == 1){
 			if(!buttonPressed ){
 				buttonToggleState = 1 - buttonToggleState;
 				buttonPressed = 1;
+
+
 			}
 			}else{
 			buttonPressed = 0;
