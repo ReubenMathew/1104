@@ -657,29 +657,31 @@ void LeftCube(){
 void ProgrammingSkills(){
 	Lift_ControlActive = true;
 	SetLiftPosition(Lift_Pos1);
-	wait1Msec(50);
+	wait1Msec(50); // Initiates Starting Position
 	//FIRST CUBE PRELOAD + STAR PRELOAD
-	SetDriveControl(Line, -20, 1);
+	SetDriveControl(Line, -20, 1); // Backsup 
 	wait1Msec(50);
 	ClawPos = Open;
 	Claw_Position = Claw_Open;
+	wait1Msec(500); // Opens claw and waits for preload
+	SetDriveControl(Line, 12, 1); // Moves forward
 	wait1Msec(500);
-	SetDriveControl(Line, 12, 1);
-	wait1Msec(500);
-	ClawPos = Closed;
+	ClawPos = Closed; // Grasp's preload
 	Claw_Position = Claw_ClosedCube - 100;
 	wait1Msec(450);
 	SetLiftPosition(Lift_Pos2);
-	wait1Msec(200);
+	wait1Msec(200); 
 	SetDriveControl(Line, -35, 2);
-	wait1Msec(500);
+	wait1Msec(500); 
 	SetLiftPosition(Lift_Pos3 + 100);
-	wait1Msec(800);
-	ClawPos = Open;
+	wait1Msec(800); // Dumps preload
+	ClawPos = Open; 
 	Claw_Position = Claw_Open - 100;
 	wait1Msec(200);
 	liftPositionOne();
 	wait1Msec(200);
+	/* The robot moves back, user put's in preload, graps preload, backs up and dumps it and remains near the fence */
+	
 	//SECOND CUBE PRELOAD + STAR PRELOAD
 	SetDriveControl(Line, 27, 1);
 	wait1Msec(500);
@@ -697,6 +699,8 @@ void ProgrammingSkills(){
 	wait1Msec(200);
 	liftPositionOne();
 	wait1Msec(200);
+	/* Robot moves forward (away from fence) and grasps preload before going back towards the fence and dumping it */
+	
 	//TURN TO PICK UP THREE STARS
 	SetLiftPosition(Lift_Pos2);
 	wait1Msec(400);
@@ -717,6 +721,7 @@ void ProgrammingSkills(){
 	RotateAngle(80,1000,100);
 	wait1Msec(425);
 	SetDriveControl(Line, -10, 1);
+	// Influenza A ^^^
 	wait1Msec(400);
 	liftPositionOne();
 	wait1Msec(400);
