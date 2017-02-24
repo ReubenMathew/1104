@@ -23,6 +23,44 @@ SetDriveControl(Line, 54*B, 1.75);
 Dump();
 }
 
+void rushiAutoItsProllyAss(){ 
+// THIS IS FOR THE LEFT SIDE
+// MIDDLE CUBE
+ClawPos = Mid;
+SetDriveControl(Line, 20, 1.75);
+wait1Msec(300);
+SetDriveControl(Rotation, 90, 1);
+wait1Msec(500);
+SetDriveControl(Line, 28, 2);
+wait1Msec(300);
+ClawPos = Closed;
+wait1Msec(1200);
+Lift_PositionCount = 4;
+wait1Msec(500);
+SetDriveControl(Line, -30, 1);
+wait1Msec(500);
+SetDriveControl(Rotation, 80, 1);
+wait1Msec(500);
+SetDriveControl(Line, -20, 1);
+wait1Msec(500);
+Dump();
+wait1Msec(300);
+  
+// PRELOAD AND SIDE STAR
+ClawPos = Open;
+SetDriveControl(Line, 34, 1.75);
+wait1Msec(500);
+ClawPos = Closed;
+SetDriveControl(Line, -34, 1.75);
+wait1Msec(500);
+Dump();
+wait1Msec(300);
+}
+
+
+
+
+
 void NewSpicyAuto(int Side){
 
 }
